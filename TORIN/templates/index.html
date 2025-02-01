@@ -36,8 +36,8 @@
         let directionsService;
         let directionsRenderer;
         let markers = [];
+        let locations = {{ locations | tojson }};  // Locations passed from Flask
         let optimizeRoute = false;
-        let locations = {{ locations | tojson }};
     
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -50,7 +50,7 @@
             directionsRenderer.setMap(map);
             directionsRenderer.setPanel(document.getElementById("directions"));
     
-            // Add the markers based on the locations
+            // Add markers based on locations
             addMarkers();
     
             // Initialize Autocomplete
@@ -82,7 +82,7 @@
                 calculateAndDisplayRoute();
             });
         }
-
+    
         function addMarkers() {
             // Remove existing markers
             markers.forEach(marker => marker.setMap(null));
@@ -96,63 +96,73 @@
                 markers.push(marker);
             });
         }
-
+    
         function calculateAndDisplayRoute() {
             if (locations.length < 2) return;
-        
-            const origin = locations[0]; // Always start at the first entered location
-            const destination = locations[locations.length - 1]; // Keep last location as endpoint
+    
+            // Use optimized locations if optimization is turned on
+            if (optimizeRoute) {
+                fetch('/optimize')
+                    .then(response => response.json())
+                    .then(optimizedLocations => {
+                        locations = optimizedLocations;
+                        addMarkers();  // Update markers after optimization
+                        showRoute();
+                    });
+            } else {
+                showRoute();
+            }
+        }
+    
+        function showRoute() {
+            const origin = locations[0];  // Always start at the first entered location
+            const destination = locations[locations.length - 1];  // Keep last location as endpoint
             const waypoints = locations.slice(1, -1).map(loc => ({
                 location: new google.maps.LatLng(loc.lat, loc.lng),
                 stopover: true
             }));
-        
+    
             const request = {
                 origin: new google.maps.LatLng(origin.lat, origin.lng),
                 destination: new google.maps.LatLng(destination.lat, destination.lng),
                 waypoints: waypoints,
-                optimizeWaypoints: optimizeRoute, // Enable/Disable optimization
                 travelMode: google.maps.TravelMode.DRIVING
             };
-        
+    
             directionsService.route(request, function(result, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     directionsRenderer.setDirections(result);
-                    displayTravelTime(result, result.routes[0].waypoint_order);
+                    displayTravelTime(result);
                 } else {
                     console.error("Directions request failed: " + status);
                 }
             });
         }
-
-        function displayTravelTime(result, waypointOrder) {
+    
+        function displayTravelTime(result) {
             let totalTime = 0;
             const route = result.routes[0];
-        
+    
             route.legs.forEach(leg => {
                 totalTime += leg.duration.value;
             });
-        
+    
             let routeOrderText = "Route Order: ";
-            if (optimizeRoute) {
-                const orderedLocations = [locations[0], ...waypointOrder.map(i => locations[i + 1]), locations[locations.length - 1]];
-                routeOrderText += orderedLocations.map((loc, index) => `Stop ${index + 1}: (${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)})`).join(" → ");
-            } else {
-                routeOrderText += locations.map((loc, index) => `Stop ${index + 1}: (${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)})`).join(" → ");
-            }
-        
+            routeOrderText += locations.map((loc, index) => `Stop ${index + 1}: (${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)})`).join(" → ");
+    
             document.getElementById("directions").innerHTML = `
                 <h3>Total Estimated Time: ${Math.round(totalTime / 60)} minutes</h3>
                 <p>${routeOrderText}</p>
                 <p>Optimization: ${optimizeRoute ? "ON (Fastest Route)" : "OFF (Entered Order)"}</p>
             `;
         }
-
+    
         function toggleOptimization() {
             optimizeRoute = !optimizeRoute; // Toggle optimization mode
             document.getElementById("optimizeButton").innerText = optimizeRoute ? "Use Entered Order" : "Optimize Route";
+            console.log("Optimization toggled: ", optimizeRoute); // Debug log
             calculateAndDisplayRoute(); // Recalculate the route with updated setting
         }
-    </script>
+    </script>    
 </body>
 </html>

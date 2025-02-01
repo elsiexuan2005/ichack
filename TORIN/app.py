@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import json
 import requests
+from geopy.distance import geodesic
 
 app = Flask(__name__)
 
@@ -9,7 +10,7 @@ locations = []  # This list will reset every time the server restarts
 
 # Geocoding function to convert address to latitude and longitude
 def geocode_address(address):
-    api_key = "YOUR_GOOGLE_API_KEY"  # Replace with your actual API key
+    api_key = "AIzaSyAf7z9qAsU1_yzblAX8aNNJsQJsYtVkujs"  # Replace with your actual API key
     geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
     response = requests.get(geocode_url)
     result = response.json()
@@ -19,6 +20,26 @@ def geocode_address(address):
         return location['lat'], location['lng']
     else:
         return None, None
+
+# Function to calculate the optimized route using a simple nearest neighbor approach
+def optimize_route(locations):
+    optimized_locations = []
+    if not locations:
+        return optimized_locations
+    
+    # Start with the first location
+    current_location = locations[0]
+    optimized_locations.append(current_location)
+    remaining_locations = locations[1:]
+
+    while remaining_locations:
+        # Find the closest location to the current location
+        closest_location = min(remaining_locations, key=lambda loc: geodesic((current_location['lat'], current_location['lng']), (loc['lat'], loc['lng'])).km)
+        optimized_locations.append(closest_location)
+        remaining_locations.remove(closest_location)
+        current_location = closest_location
+    
+    return optimized_locations
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -41,6 +62,12 @@ def clear_locations():
     global locations
     locations = []  # Reset list
     return redirect(url_for('index'))
+
+@app.route('/optimize', methods=['GET'])
+def get_optimized_route():
+    """Returns the optimized route (order of locations)."""
+    optimized_locations = optimize_route(locations)
+    return jsonify(optimized_locations)
 
 if __name__ == '__main__':
     app.run(debug=True)
