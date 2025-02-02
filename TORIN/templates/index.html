@@ -36,7 +36,7 @@
         let directionsService;
         let directionsRenderer;
         let markers = [];
-        let locations = {{ locations | tojson }};  // Locations passed from Flask
+        let locations = JSON.parse('{{ locations | safe }}');  // Locations passed from Flask
         let optimizeRoute = false;
     
         function initMap() {

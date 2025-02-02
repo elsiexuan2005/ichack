@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import './Plan.css';
+import Map from './Map'
 
 function Plan() {
   const dummyActivities = ['Visit Museum', 'Lunch at Cafe', 'Walk in Park', 'Shopping', 'Visit Gallery', 'Go to beach', 'Visit zoo'];
   const [plannedActivities, setPlannedActivities] = useState([]);
   const [nearbyActivities, setNearbyActivities] = useState(dummyActivities);
+  const [locations, setLocations] = useState([{ lat: 51.9, lng: -2.1 }, { lat: 51.8, lng: -2.2 }]);
 
   const handleDragStart = (event, activity, listType) => {
     event.dataTransfer.setData('text/plain', JSON.stringify({ activity, listType }));
@@ -27,11 +29,15 @@ function Plan() {
     event.preventDefault();
   };
 
+  const handleAddLocation = (newLocation) => {
+    setLocations([...locations, newLocation])
+  }
+
   return (
     <div className="plan-container">
       <div className="upper-container">
         <div className="map-container">
-          <p>Interactive Map (Dummy)</p>
+          <Map locations={locations} />
         </div>
         <div className="activities-container">
           <div
