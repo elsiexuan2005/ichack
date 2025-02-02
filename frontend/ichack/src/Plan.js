@@ -39,7 +39,7 @@ function Plan() {
             onDragOver={handleDragOver}
             onDrop={(event) => handleDrop(event, 'planned')}
           >
-            <h2>Planned Activities</h2>
+            <h2 className="activities-header">Planned Activities</h2>
             <ul className="activity-list">
               {plannedActivities.map((activity, index) => (
                 <li
@@ -57,7 +57,7 @@ function Plan() {
             onDragOver={handleDragOver}
             onDrop={(event) => handleDrop(event, 'nearby')}
           >
-            <h2>Nearby Activities</h2>
+            <h2 className="activities-header">Nearby Activities</h2>
             <ul className="activity-list">
               {nearbyActivities.map((activity, index) => (
                 <li
@@ -72,7 +72,7 @@ function Plan() {
           </div>
         </div>
       </div>
-      <textarea className="user-notes" placeholder="Add your notes here..."></textarea>
+      <textarea className="user-notes" placeholder="State any preferences here"></textarea>
     </div>
   );
 }

@@ -70,7 +70,7 @@ function Home() {
         </div>
         <input 
           type="text" 
-          placeholder="HH:MM" 
+          placeholder="H:MM" 
           value={time} 
           onChange={handleTimeChange} 
           className="time-input"

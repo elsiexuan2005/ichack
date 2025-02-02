@@ -11,13 +11,16 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    background-image: url('images/mountain.jpg');
+    background-size: cover;
+    background-position: center;
   }
   
   .title {
     font-size: 72px;
     font-weight: bold;
-    margin-bottom: 40px;
-    color: #333;
+    margin-top: -80px;
+    color: #1d1d1d;
   }
   
   .search-container {
@@ -31,7 +34,7 @@ body {
   
   .search-bar {
     width: 100%;
-    max-width: 500px;
+    max-width: 700px;
     padding: 15px 25px 15px 50px; /* Adjust padding to reduce height */
     font-size: 18px;
     border: 2px solid #ddd;
@@ -48,7 +51,7 @@ body {
   
   .search-icon {
     position: absolute;
-    left: 78px;
+    left: 17px;
     top: 50%;
     transform: translateY(-50%);
     color: #888;
@@ -99,10 +102,10 @@ body {
   
   .plan-button {
     padding: 15px 30px;
-    margin-top: 20px;
+    margin-top: 80px;
     font-size: 18px;
     color: #fff;
-    background-color: #007bff;
+    background-color: #242323;
     border: none;
     border-radius: 50px;
     cursor: pointer;
@@ -110,5 +113,5 @@ body {
   }
   
   .plan-button:hover {
-    background-color: #0056b3;
+    background-color: #000000;
   }
